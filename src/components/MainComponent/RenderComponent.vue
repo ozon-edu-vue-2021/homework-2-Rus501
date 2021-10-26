@@ -1,17 +1,15 @@
 <template>
   <div :shown="shown" @click.stop="unfoldFolder($event)" class="wrapper">
-    <folder-icon v-if="item[propType] === 'directory'" />
-    <file-icon v-if="item[propType] === 'file'" />
-    <link-icon v-if="item[propType] === 'link'" />
+    <component :is="icon"></component>
     {{ item[propName] }}
     <div
       v-if="shown && item.contents && item.contents.length > 0"
       class="subtree"
     >
       <render-component
-        v-for="(item, i) in item.contents"
-        :key="i"
+        v-for="item in item.contents"
         :item="item"
+        :key="item[propName]"
         prop-type="type"
         prop-name="name"
       />
@@ -25,7 +23,6 @@ import FileIcon from '../Icons/FileIcon.vue'
 import LinkIcon from '../Icons/LinkIcon.vue'
 
 export default {
-  components: { FolderIcon, FileIcon, LinkIcon },
   name: 'RenderComponent',
   props: {
     item: {
@@ -48,6 +45,18 @@ export default {
   data: () => ({
     shown: false,
   }),
+  computed: {
+    icon() {
+      switch (this.item[this.propType]) {
+        case 'link':
+          return LinkIcon
+        case 'file':
+          return FileIcon
+        default:
+          return FolderIcon
+      }
+    },
+  },
   methods: {
     unfoldFolder(event) {
       this.item[this.propType] === 'directory'
