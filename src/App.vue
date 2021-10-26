@@ -3,13 +3,7 @@
     <img class="logo-img" alt="Vue logo" src="./assets/logo.png" />
 
     <div class="tree-component">
-      <render-component
-        v-for="(item, i) in items"
-        :key="i"
-        :item="item"
-        :shown="shown"
-        @unfold="unfoldFolder"
-      />
+      <render-component v-for="item in items" :key="item.name" :item="item" />
     </div>
   </div>
 </template>
@@ -23,13 +17,7 @@ export default {
   components: { RenderComponent },
   data: () => ({
     items,
-    shown: false,
   }),
-  methods: {
-    unfoldFolder(item) {
-      console.log(item)
-    },
-  },
 }
 </script>
 
