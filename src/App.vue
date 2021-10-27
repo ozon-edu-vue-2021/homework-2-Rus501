@@ -1,9 +1,15 @@
 <template>
   <div id="app">
     <img class="logo-img" alt="Vue logo" src="./assets/logo.png" />
-    <p>Path: {{ path.join('/') }}</p>
+    <p>Path: {{ path }}</p>
     <div class="tree-component">
-      <render-component v-for="item in items" :key="item.name" :item="item" />
+      <render-component
+        v-for="item in items"
+        :key="item.name"
+        :item="item"
+        :path="`/${item.name}`"
+        @select="(value) => (path = value)"
+      />
     </div>
   </div>
 </template>
@@ -11,20 +17,14 @@
 <script>
 import * as items from '../public/static/node_modules.json'
 import RenderComponent from './components/MainComponent/RenderComponent.vue'
-import EventBus from './utils/event-bus'
 
 export default {
   name: 'App',
   components: { RenderComponent },
   data: () => ({
     items,
-    path: [],
+    path: '',
   }),
-  mounted() {
-    EventBus.$on('get-path', (item) => {
-      this.path.push(item.name)
-    })
-  },
 }
 </script>
 

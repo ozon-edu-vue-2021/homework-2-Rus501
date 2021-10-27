@@ -11,6 +11,8 @@
         :key="item[propName]"
         prop-type="type"
         prop-name="name"
+        :path="`${path}/${item.name}`"
+        @select="(value) => $emit('select', value)"
       />
     </div>
   </div>
@@ -20,7 +22,6 @@
 import FolderIcon from '../Icons/FolderIcon.vue'
 import FileIcon from '../Icons/FileIcon.vue'
 import LinkIcon from '../Icons/LinkIcon.vue'
-import EventBus from '../../utils/event-bus'
 
 export default {
   name: 'RenderComponent',
@@ -37,13 +38,17 @@ export default {
       type: String,
       default: 'name',
     },
+    path: {
+      type: String,
+      default: '/',
+    },
   },
   data: () => ({
     shown: false,
   }),
   computed: {
     isFolder() {
-      return this.shown && this.item.contents && this.item.contents.length > 0
+      return this.shown && this.item.contents
     },
     icon() {
       switch (this.item[this.propType]) {
@@ -58,7 +63,7 @@ export default {
   },
   methods: {
     unfoldFolder(event) {
-      EventBus.$emit('get-path', this.item)
+      this.$emit('select', this.path)
       this.item[this.propType] === 'directory'
         ? (this.shown = !this.shown)
         : window.getSelection().selectAllChildren(event.target)
