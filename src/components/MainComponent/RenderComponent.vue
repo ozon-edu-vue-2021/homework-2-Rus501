@@ -1,11 +1,10 @@
 <template>
   <div :shown="shown" @click.stop="unfoldFolder($event)" class="wrapper">
-    <component :is="icon"></component>
-    {{ item[propName] }}
-    <div
-      v-if="shown && item.contents && item.contents.length > 0"
-      class="subtree"
-    >
+    <div class="wrapper-inside">
+      <component :is="icon"></component>
+      <span>{{ item[propName] }}</span>
+    </div>
+    <div v-if="isFolder" class="subtree">
       <render-component
         v-for="item in item.contents"
         :item="item"
@@ -21,6 +20,7 @@
 import FolderIcon from '../Icons/FolderIcon.vue'
 import FileIcon from '../Icons/FileIcon.vue'
 import LinkIcon from '../Icons/LinkIcon.vue'
+import EventBus from '../../utils/event-bus'
 
 export default {
   name: 'RenderComponent',
@@ -37,15 +37,14 @@ export default {
       type: String,
       default: 'name',
     },
-    contents: {
-      type: Array,
-      default: () => [],
-    },
   },
   data: () => ({
     shown: false,
   }),
   computed: {
+    isFolder() {
+      return this.shown && this.item.contents && this.item.contents.length > 0
+    },
     icon() {
       switch (this.item[this.propType]) {
         case 'link':
@@ -59,6 +58,7 @@ export default {
   },
   methods: {
     unfoldFolder(event) {
+      EventBus.$emit('get-path', this.item)
       this.item[this.propType] === 'directory'
         ? (this.shown = !this.shown)
         : window.getSelection().selectAllChildren(event.target)
@@ -74,5 +74,11 @@ export default {
 
 .subtree {
   margin-left: 15px;
+}
+
+.wrapper-inside {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 </style>

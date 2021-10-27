@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <img class="logo-img" alt="Vue logo" src="./assets/logo.png" />
-
+    <p>Path: {{ path.join('/') }}</p>
     <div class="tree-component">
       <render-component v-for="item in items" :key="item.name" :item="item" />
     </div>
@@ -11,13 +11,20 @@
 <script>
 import * as items from '../public/static/node_modules.json'
 import RenderComponent from './components/MainComponent/RenderComponent.vue'
+import EventBus from './utils/event-bus'
 
 export default {
   name: 'App',
   components: { RenderComponent },
   data: () => ({
     items,
+    path: [],
   }),
+  mounted() {
+    EventBus.$on('get-path', (item) => {
+      this.path.push(item.name)
+    })
+  },
 }
 </script>
 
@@ -29,6 +36,10 @@ export default {
   font-size: 22px;
   color: #2c3e50;
   margin-top: 20px;
+}
+
+p {
+  text-align: center;
 }
 
 .logo-img {
