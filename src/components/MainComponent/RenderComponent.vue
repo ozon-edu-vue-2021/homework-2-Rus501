@@ -1,5 +1,13 @@
 <template>
-  <div :shown="shown" @click.stop="unfoldFolder($event)" class="wrapper">
+  <div
+    @keyup.arrow-up.stop="moveFocusUp"
+    @keyup.arrow-down.stop="moveFocusDown"
+    @keyup.enter.stop="unfoldFolder"
+    tabindex="0"
+    :shown="shown"
+    @click.stop="unfoldFolder"
+    class="wrapper"
+  >
     <div class="wrapper-inside">
       <component :is="icon"></component>
       <span>{{ item[propName] }}</span>
@@ -22,6 +30,17 @@
 import FolderIcon from '../Icons/FolderIcon.vue'
 import FileIcon from '../Icons/FileIcon.vue'
 import LinkIcon from '../Icons/LinkIcon.vue'
+
+// prevent page scrolling with arrow keys
+document.addEventListener(
+  'keydown',
+  (e) => {
+    if (['ArrowUp', 'ArrowDown'].indexOf(e.code) > -1) {
+      e.preventDefault()
+    }
+  },
+  false
+)
 
 export default {
   name: 'RenderComponent',
@@ -61,12 +80,58 @@ export default {
       }
     },
   },
+  directives: {
+    // focus: {
+    //   inserted(el) {
+    //     el.focus()
+    //   },
+    // },
+  },
   methods: {
     unfoldFolder(event) {
       this.$emit('select', this.path)
+
       this.item[this.propType] === 'directory'
         ? (this.shown = !this.shown)
         : window.getSelection().selectAllChildren(event.target)
+    },
+    moveFocusUp(e) {
+      const shown = e.target.getAttribute('shown')
+      const unfolded = !e.target.querySelector('.wrapper')
+      if (shown && unfolded) {
+        e.target.querySelector('.wrapper').focus()
+      } else {
+        const prevFolder = e.target.previousElementSibling
+        prevFolder
+          ? prevFolder.focus()
+          : e.target.parentElement.parentElement.focus()
+      }
+    },
+    moveFocusDown(e) {
+      const shown = e.target.getAttribute('shown')
+      if (shown) {
+        e.target.querySelector('.wrapper').focus()
+      } else {
+        const nextElem = e.target.nextElementSibling
+        if (nextElem) {
+          e.target.nextElementSibling.focus()
+        } else {
+          let parentHasNextSibling =
+            e.target.parentElement.parentElement.nextElementSibling
+
+          const traverseUp = (elem) => {
+            let parent = elem.parentElement.parentElement
+            while (!parent.nextElementSibling) {
+              parent = parent.parentElement.parentElement
+            }
+            return parent.nextElementSibling
+          }
+
+          parentHasNextSibling
+            ? parentHasNextSibling.focus()
+            : traverseUp(e.target).focus()
+        }
+      }
     },
   },
 }
